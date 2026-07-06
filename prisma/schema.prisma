@@ -27,6 +27,8 @@ model User {
   role      Role     @default(CUSTOMER)
   orders    Order[]
   createdAt DateTime @default(now())
+  resetToken String?
+  resetTokenExpires DateTime?
 }
 
 model Product {
