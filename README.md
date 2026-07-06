@@ -41,10 +41,16 @@ MAIL_PORT=2525
 MAIL_USER=your_mailtrap_user
 MAIL_PASS=your_mailtrap_password
 MAIL_FROM="Ozan E-Commerce <noreply@yourdomain.com>"
+```
 
-Method Endpoint                Description                      Rate Limit / Guard
-POST   /auth/register          Create a new user account        3 requests / min
-POST   /auth/login             Authenticate and get JWT token   3 requests / min
-GET    /auth/me                Fetch active user profile        JWT Guard
-POST   /auth/forgot-password   Trigger password reset email     3 requests / min
-POST   /auth/reset-password    Update password using token      3 requests / min
+---
+
+## 📌 API Endpoints
+
+| Method | Endpoint | Description |Rate Limit / Guard
+| :--- | :--- | :--- | :--- |
+| POST | /auth/register | Create a new user account | 3 requests / min
+| POST | /auth/login | Authenticate and get JWT token | 3 requests / min
+| GET  | /auth/me | Fetch active user profile | JWT Guard
+| POST | /auth/forgot-password | Trigger password reset email | 3 requests / min
+| POST | /auth/reset-password | Update password using token | 3 requests / min
