@@ -23,13 +23,16 @@ A production-ready backend infrastructure built with NestJS. It includes secure 
 
 ## ⚙️ Setup & Installation
 
-### 1. Install Dependencies
-```bash
-npm install
+| Step | Task | Command / Configuration |
+| :--- | :--- | :--- |
+| **1** | Install Dependencies | `npm install` |
+| **2** | Environment Variables | Create a `.env` file in the root directory and add the configuration template below. |
+| **3** | Database Migrations | `npx prisma migrate dev` |
+| **4** | Run (Development) | `npm run start:dev` |
+| **5** | Run (Production) | `npm run start:prod` |
 
-### 2. Environment Variables (.env)
-Create a .env file in the root directory and add your configurations:
-
+### `.env` Template
+```env
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
 JWT_SECRET="your-super-secret-jwt-key"
 
@@ -37,21 +40,11 @@ MAIL_HOST=smtp.mailtrap.io
 MAIL_PORT=2525
 MAIL_USER=your_mailtrap_user
 MAIL_PASS=your_mailtrap_password
-MAIL_FROM="E-Commerce <noreply@yourdomain.com>"
+MAIL_FROM="Ozan E-Commerce <noreply@yourdomain.com>"
 
-### 3. Database Migrations
-npx prisma migrate dev
-
-### 4. Run the App
-# Development mode
-npm run start:dev
-
-# Production mode
-npm run start:prod
-
-Method,Endpoint,Description,Rate Limit / Guard
-POST,/auth/register,Create a new user account,3 requests / min
-POST,/auth/login,Authenticate and get JWT token,3 requests / min
-GET,/auth/me,Fetch active user profile,JWT Guard
-POST,/auth/forgot-password,Trigger password reset email,3 requests / min
-POST,/auth/reset-password,Update password using token,3 requests / min
+Method Endpoint                Description                      Rate Limit / Guard
+POST   /auth/register          Create a new user account        3 requests / min
+POST   /auth/login             Authenticate and get JWT token   3 requests / min
+GET    /auth/me                Fetch active user profile        JWT Guard
+POST   /auth/forgot-password   Trigger password reset email     3 requests / min
+POST   /auth/reset-password    Update password using token      3 requests / min
