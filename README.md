@@ -1,33 +1,57 @@
-# My E-Commerce Journey: NestJS & Prisma Backend
+# E-Commerce Backend API
 
-Hi! I built this project to challenge myself and step up from standard Express.js into production-grade backend architecture. After studying Computer Programming, I wanted to learn how large-scale enterprise applications are structured, which led me straight to NestJS.
+A production-ready backend infrastructure built with NestJS. It includes secure authentication, database management with Prisma, and automated mail delivery, all protected under a strict rate-limiting shield.
 
-This is a functional e-commerce REST API focused on clean architecture, strict data validation, and secure authentication.
+## 🚀 Tech Stack
 
-## 🧠 Why I Built It This Way
+* **Framework:** NestJS (TypeScript)
+* **ORM:** Prisma ORM (PostgreSQL)
+* **Auth:** Passport.js with JWT Strategy
+* **Security:** `@nestjs/throttler` (Rate Limiting)
+* **Mail:** `@nestjs-modules/mailer` (Mailtrap integration)
 
-* **Why NestJS over Express?** I wanted to move away from the "wild west" style of Express and learn a structured, modular framework. NestJS forces me to write maintainable code using Modules and Services, which is what real-world companies actually use.
-* **Why Prisma & PostgreSQL?** Writing raw SQL can get messy. I chose Prisma ORM for its type-safety and combined it with PostgreSQL because relational databases make the most sense for structured e-commerce data (Users, Roles, Products).
-* **Strict Validation:** In `main.ts`, I explicitly enabled `whitelist: true` and `forbidNonWhitelisted: true`. I did this to ensure the API immediately rejects any unexpected or malicious payloads—security first.
+---
 
-## 🛠️ Tech Stack I Used
+## 🛠️ Key Features
 
-* **Framework:** NestJS (Node.js)
-* **Language:** TypeScript
-* **ORM:** Prisma
-* **Database:** PostgreSQL
-* **Security:** JWT (JSON Web Tokens), Bcrypt for password hashing
+* **Authentication:** Secure register and login flows with `bcrypt` password hashing. Protected routes use a custom `@GetUser()` decorator to easily pull session data.
+* **Password Reset Flow:** Generates secure 32-byte tokens via the native `crypto` module. Links automatically expire after 15 minutes. 
+* **Token Kill-Switch:** To ensure security, the token is instantly wiped from the database (`resetToken: null`) as soon as the password is reset. A link can never be reused.
+* **Rate Limiting:** Protects high-risk endpoints (`login`, `register`, `forgot-password`, `reset-password`) against brute-force and spam by limiting traffic to **3 requests per minute**. Other application routes are globally limited to 20 requests per minute.
 
-## 📂 Current Progress
+---
 
-* **[x] Auth Module:** Secure `signUp` and `signIn` flow. Passwords are never stored in plain text (hashed with bcrypt).
-* **[x] User Module:** Profile management with Role-Based Access Control (`USER` and `ADMIN` enums).
-* **[ ] Products & Cart (Next Up):** Currently planning the database relations for products, categories, and shopping carts.
+## ⚙️ Setup & Installation
 
-## 🚀 How to Run It Locally
+### 1. Install Dependencies
+```bash
+npm install
 
-1. Clone the repo: `git clone https://github.com/ozangun/ecommerce-backend`
-2. Install dependencies: `npm install`
-3. Set up your `.env` file (Database URL and JWT Secret)
-4. Run Prisma migrations: `npx prisma migrate dev`
-5. Start the server: `npm run start:dev`
+### 2. Environment Variables (.env)
+Create a .env file in the root directory and add your configurations:
+
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
+JWT_SECRET="your-super-secret-jwt-key"
+
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USER=your_mailtrap_user
+MAIL_PASS=your_mailtrap_password
+MAIL_FROM="E-Commerce <noreply@yourdomain.com>"
+
+### 3. Database Migrations
+npx prisma migrate dev
+
+### 4. Run the App
+# Development mode
+npm run start:dev
+
+# Production mode
+npm run start:prod
+
+Method,Endpoint,Description,Rate Limit / Guard
+POST,/auth/register,Create a new user account,3 requests / min
+POST,/auth/login,Authenticate and get JWT token,3 requests / min
+GET,/auth/me,Fetch active user profile,JWT Guard
+POST,/auth/forgot-password,Trigger password reset email,3 requests / min
+POST,/auth/reset-password,Update password using token,3 requests / min
