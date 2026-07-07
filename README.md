@@ -1,6 +1,6 @@
 # E-Commerce Backend API
 
-A production-ready backend infrastructure built with NestJS. It includes secure authentication, database management with Prisma, and automated mail delivery, all protected under a strict rate-limiting shield.
+A production-ready backend infrastructure built with NestJS. It includes secure authentication, database management with Prisma, a dynamic shopping cart system, and automated mail delivery, all protected under a strict rate-limiting shield.
 
 ## 🚀 Tech Stack
 
@@ -18,6 +18,10 @@ A production-ready backend infrastructure built with NestJS. It includes secure 
 * **Password Reset Flow:** Generates secure 32-byte tokens via the native `crypto` module. Links automatically expire after 15 minutes. 
 * **Token Kill-Switch:** To ensure security, the token is instantly wiped from the database (`resetToken: null`) as soon as the password is reset. A link can never be reused.
 * **Rate Limiting:** Protects high-risk endpoints (`login`, `register`, `forgot-password`, `reset-password`) against brute-force and spam by limiting traffic to **3 requests per minute**. Other application routes are globally limited to 20 requests per minute.
+* **Dynamic Cart System:** * *Smart Upsert Logic:* Adding products to the cart automatically handles both initialization and multi-item quantities without duplicate records.
+  * *Data Integrity:* Leverages PostgreSQL composite unique constraints (`cartId_productId`) at the database layer.
+  * *Deep Nested Fetching:* Optimized Prisma `include` queries to fetch Cart ➔ CartItems ➔ Product details in a single database round-trip.
+  * *Dynamic Item Management:* Automatically purges the `CartItem` record if the quantity drops to zero or below during depletion requests.
 
 ---
 
@@ -47,6 +51,7 @@ MAIL_FROM="Ozan E-Commerce <noreply@yourdomain.com>"
 
 ## 📌 API Endpoints
 
+## Auth Module
 | Method | Endpoint | Description |Rate Limit / Guard
 | :--- | :--- | :--- | :--- |
 | POST | /auth/register | Create a new user account | 3 requests / min
@@ -54,3 +59,10 @@ MAIL_FROM="Ozan E-Commerce <noreply@yourdomain.com>"
 | GET  | /auth/me | Fetch active user profile | JWT Guard
 | POST | /auth/forgot-password | Trigger password reset email | 3 requests / min
 | POST | /auth/reset-password | Update password using token | 3 requests / min
+
+## Cart Module
+| Method | Endpoint | Description |Rate Limit / Guard
+| :--- | :--- | :--- | :--- |
+| POST | /cart/add | Adds a product to the cart or increases quantity | JWT Guard
+| GET | /cart | Retrieves the current user's cart with full product details | JWT Guard
+| POST  | /cart/remove | Decreases product quantity or removes it entirely if quantity reaches 0 | JWT Guard
