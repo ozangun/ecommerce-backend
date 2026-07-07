@@ -27,8 +27,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard) 
   getProfile(@GetUser() user: any) {
     return {
-      message: 'Passport korumalı güvenli bölgeye hoş geldin!',
-      user, 
+      user
     };
   }
   @Throttle({ medium: { limit: 3, ttl: 60000 } })

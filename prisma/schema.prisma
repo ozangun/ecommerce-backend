@@ -21,14 +21,26 @@ enum OrderStatus {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  role      Role     @default(CUSTOMER)
-  orders    Order[]
-  createdAt DateTime @default(now())
-  resetToken String?
+  id                Int       @id @default(autoincrement())
+  email             String    @unique
+  password          String
+  role              Role      @default(CUSTOMER)
+  orders            Order[]
+  createdAt         DateTime  @default(now())
+  resetToken        String?
   resetTokenExpires DateTime?
+  cart              Cart?
+}
+
+model Category {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  slug      String     @unique
+  products  Product[]
+  parentId  Int?
+  parent    Category?  @relation("CategoryToCategory", fields: [parentId], references: [id], onDelete: Cascade)
+  children  Category[] @relation("CategoryToCategory")
+  createdAt DateTime   @default(now())
 }
 
 model Product {
@@ -38,16 +50,19 @@ model Product {
   price       Float
   stock       Int
   orderItems  OrderItem[]
+  cartItems   CartItem[]
+  categoryId  Int
+  category    Category    @relation(fields: [categoryId], references: [id])
   createdAt   DateTime    @default(now())
 }
 
 model Order {
-  id        Int          @id @default(autoincrement())
+  id        Int         @id @default(autoincrement())
   userId    Int
   status    OrderStatus @default(CREATED)
   items     OrderItem[]
-  user      User         @relation(fields: [userId], references: [id])
-  createdAt DateTime     @default(now())
+  user      User        @relation(fields: [userId], references: [id])
+  createdAt DateTime    @default(now())
 }
 
 model OrderItem {
@@ -56,7 +71,26 @@ model OrderItem {
   productId Int
   quantity  Int
   price     Float
+  order     Order   @relation(fields: [orderId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+}
 
-  order   Order   @relation(fields: [orderId], references: [id])
-  product Product @relation(fields: [productId], references: [id])
+model Cart {
+  id        Int        @id @default(autoincrement())
+  userId    Int        @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        Int     @id @default(autoincrement())
+  cartId    Int
+  productId Int
+  quantity  Int
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, productId])
 }
