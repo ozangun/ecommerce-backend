@@ -59,6 +59,7 @@ model Product {
 model Order {
   id        Int         @id @default(autoincrement())
   userId    Int
+  totalPrice Float
   status    OrderStatus @default(CREATED)
   items     OrderItem[]
   user      User        @relation(fields: [userId], references: [id])

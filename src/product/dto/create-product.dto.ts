@@ -1,25 +1,29 @@
-import { IsInt, IsNotEmpty, IsNumber, IsString, Min} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class CreateProductDto {
-  @IsNotEmpty({ message: 'Product name field cannot be empty.' })
-  @IsString({ message: 'Product name must be a string.' })
+  @ApiProperty({ example: 'iPhone 15 Pro Max', description: 'The name of the product' })
+  @IsString()
+  @IsNotEmpty()
   name!: string;
 
-  @IsNotEmpty({ message: 'Product description field cannot be empty.' })
-  @IsString({ message: 'Product description must be a string.' })
+  @ApiProperty({ example: 'Titanium Blue, 256GB storage', description: 'Detailed description of the product' })
+  @IsString()
+  @IsNotEmpty()
   description!: string;
 
-  @IsNotEmpty({ message: 'Product price field cannot be empty.' })
-  @Min(0)
+  @ApiProperty({ example: 1299.99, description: 'Price of the product' })
   @IsNumber()
+  @IsNotEmpty()
   price!: number;
 
-  @IsNotEmpty({ message: 'Product stock field cannot be empty.' })
-  @Min(0)
-  @IsInt({ message: 'Stock number must be an integer.' })
+  @ApiProperty({ example: 50, description: 'Available stock quantity' })
+  @IsNumber()
+  @IsNotEmpty()
   stock!: number;
-  
-  @IsNotEmpty({ message: 'Category ID field cannot be empty.' })
-  @IsInt({ message: 'Category ID must be an integer.' })
+
+  @ApiProperty({ example: 2, description: 'The ID of the category this product belongs to' })
+  @IsNumber()
+  @IsNotEmpty()
   categoryId!: number;
 }
