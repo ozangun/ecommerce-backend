@@ -1,27 +1,51 @@
 # E-Commerce Backend API
 
-A production-ready backend infrastructure built with NestJS. It includes secure authentication, database management with Prisma, a dynamic shopping cart system, and automated mail delivery, all protected under a strict rate-limiting shield.
+A production-ready backend infrastructure built with NestJS. It features secure authentication, optimized database management with Prisma, a dynamic shopping cart system, automated mail delivery, and typo-tolerant search capabilities—all protected under a strict rate-limiting shield.
 
 ## 🚀 Tech Stack
 
 * **Framework:** NestJS (TypeScript)
-* **ORM:** Prisma ORM (PostgreSQL)
+* **Database:** PostgreSQL with Prisma ORM
 * **Auth:** Passport.js with JWT Strategy
-* **Security:** `@nestjs/throttler` (Rate Limiting)
+* **Cache:** Redis (Cache-Manager)
+* **Search Engine:** Elasticsearch
+* **Environment:** Docker & Docker Compose
+* **Security:** `@nestjs/throttler` (Rate Limiting) & `bcrypt` (Hashing)
 * **Mail:** `@nestjs-modules/mailer` (Mailtrap integration)
 
 ---
 
 ## 🛠️ Key Features
 
-* **Authentication:** Secure register and login flows with `bcrypt` password hashing. Protected routes use a custom `@GetUser()` decorator to easily pull session data.
-* **Password Reset Flow:** Generates secure 32-byte tokens via the native `crypto` module. Links automatically expire after 15 minutes. 
-* **Token Kill-Switch:** To ensure security, the token is instantly wiped from the database (`resetToken: null`) as soon as the password is reset. A link can never be reused.
-* **Rate Limiting:** Protects high-risk endpoints (`login`, `register`, `forgot-password`, `reset-password`) against brute-force and spam by limiting traffic to **3 requests per minute**. Other application routes are globally limited to 20 requests per minute.
-* **Dynamic Cart System:** * *Smart Upsert Logic:* Adding products to the cart automatically handles both initialization and multi-item quantities without duplicate records.
-  * *Data Integrity:* Leverages PostgreSQL composite unique constraints (`cartId_productId`) at the database layer.
-  * *Deep Nested Fetching:* Optimized Prisma `include` queries to fetch Cart ➔ CartItems ➔ Product details in a single database round-trip.
-  * *Dynamic Item Management:* Automatically purges the `CartItem` record if the quantity drops to zero or below during depletion requests.
+### 🔐 Security & Authentication
+* **Auth Flows:** Secure register and login pipelines with `bcrypt` password hashing. Protected routes use a custom `@GetUser()` decorator to extract session data.
+* **Password Reset Flow:** Generates secure 32-byte tokens via the native `crypto` module. Links automatically expire after 15 minutes.
+* **Token Kill-Switch:** The reset token is instantly wiped from the database (`resetToken: null`) as soon as the password is changed, ensuring a link can never be reused.
+* **Rate Limiting Protection:** High-risk endpoints (`login`, `register`, `forgot-password`, `reset-password`) are strictly limited to **3 requests per minute** to prevent brute-force attacks. Other global application routes are limited to 20 requests per minute.
+
+### 🛒 Dynamic Cart & Order Management
+* **Smart Upsert Logic:** Adding products to the cart automatically handles both item initialization and multi-item quantities without duplicate records.
+* **Data Integrity:** Leverages PostgreSQL composite unique constraints (`cartId_productId`) at the database layer.
+* **Deep Nested Fetching:** Optimized Prisma `include` queries fetch Cart ➔ CartItems ➔ Product details in a single database round-trip.
+* **Dynamic Item Management:** Automatically purges the `CartItem` record from the database if its quantity drops to zero or below during depletion requests.
+* **Stok Control & Orders:** Validates inventory availability in real-time during checkout and automatically deducts stock upon successful orders.
+
+### ⚡ Performance & Smart Search
+* **Fuzzy Product Search:** Integrated with Elasticsearch utilizing `fuzziness: 'AUTO'`. It intelligently catches typos (e.g., matching "iphone" even if the user types "iphne").
+* **Redis Caching:** Accelerates frequent product listings (`getAllProducts`). The cache is automatically evicted (`cacheManager.del`) whenever a new product is created to guarantee data consistency.
+* **Automated Mail:** Integrated Mailtrap workflow to dispatch transactional emails (e.g., password reset tokens, order confirmations) asynchronously.
+
+---
+
+## 🐳 Docker Infrastructure
+
+The project utilizes Docker Compose to manage local infrastructure dependencies. Running the environment spins up the following standalone services:
+
+| Service | Image | Internal Port | Description |
+| :--- | :--- | :--- | :--- |
+| **PostgreSQL** | `postgres` | `5432` | Relational database handling users, products, carts, and orders. |
+| **Redis** | `redis` | `6379` | In-memory data store optimizing heavy read queries via caching. |
+| **Elasticsearch** | `elasticsearch` | `9200` | Full-text search engine executing fast and fuzzy product inquiries. |
 
 ---
 
@@ -29,11 +53,12 @@ A production-ready backend infrastructure built with NestJS. It includes secure 
 
 | Step | Task | Command / Configuration |
 | :--- | :--- | :--- |
-| **1** | Install Dependencies | `npm install` |
-| **2** | Environment Variables | Create a `.env` file in the root directory and add the configuration template below. |
-| **3** | Database Migrations | `npx prisma migrate dev` |
-| **4** | Run (Development) | `npm run start:dev` |
-| **5** | Run (Production) | `npm run start:prod` |
+| **1** | Install Dependencies | `npm install --legacy-peer-deps` |
+| **2** | Infrastructure Setup | `docker-compose up -d` |
+| **3** | Environment Variables | Create a `.env` file in the root directory (Template below) |
+| **4** | Database Migrations | `npx prisma migrate dev` |
+| **5** | Run (Development) | `npm run start:dev` |
+| **6** | Run (Production) | `npm run start:prod` |
 
 ### `.env` Template
 ```env
@@ -51,18 +76,4 @@ MAIL_FROM="Ozan E-Commerce <noreply@yourdomain.com>"
 
 ## 📌 API Endpoints
 
-## Auth Module
-| Method | Endpoint | Description |Rate Limit / Guard
-| :--- | :--- | :--- | :--- |
-| POST | /auth/register | Create a new user account | 3 requests / min
-| POST | /auth/login | Authenticate and get JWT token | 3 requests / min
-| GET  | /auth/me | Fetch active user profile | JWT Guard
-| POST | /auth/forgot-password | Trigger password reset email | 3 requests / min
-| POST | /auth/reset-password | Update password using token | 3 requests / min
-
-## Cart Module
-| Method | Endpoint | Description |Rate Limit / Guard
-| :--- | :--- | :--- | :--- |
-| POST | /cart/add | Adds a product to the cart or increases quantity | JWT Guard
-| GET | /cart | Retrieves the current user's cart with full product details | JWT Guard
-| POST  | /cart/remove | Decreases product quantity or removes it entirely if quantity reaches 0 | JWT Guard
+http://localhost:3000/api
