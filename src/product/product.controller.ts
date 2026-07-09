@@ -1,11 +1,11 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common'; // Query import ettik
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/roles.guard';
 import { Roles } from 'src/auth/roles.decorator';
 import { Role } from '@prisma/client';
 import { CreateProductDto } from './dto/create-product.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger'; // ApiQuery ekledik
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 
 @ApiTags('Products')
 @Controller('product')

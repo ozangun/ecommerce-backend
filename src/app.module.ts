@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
@@ -33,11 +33,12 @@ import { SearchModule } from './search/search.module';
     ConfigModule.forRoot({ isGlobal: true }),
     CacheModule.registerAsync({
       isGlobal: true,
-      useFactory: async () => ({
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
         store: await redisStore({
           socket: {
-            host: 'localhost',
-            port: 6379,
+            host: configService.get<string>('REDIS_HOST') || 'localhost',
+            port: configService.get<number>('REDIS_PORT') || 6379,
           },
           ttl: 300000,
         }),
