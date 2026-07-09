@@ -62,14 +62,20 @@ The project utilizes Docker Compose to manage local infrastructure dependencies.
 
 ### `.env` Template
 ```env
-DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
-JWT_SECRET="your-super-secret-jwt-key"
+DB_PASSWORD=your_super_secret_password_here
+DATABASE_URL=postgresql://postgres:your_super_secret_password_here@localhost:5432/ecommerce?schema=public
+
+JWT_SECRET=your_jwt_secret_key_here
 
 MAIL_HOST=smtp.mailtrap.io
 MAIL_PORT=2525
-MAIL_USER=your_mailtrap_user
-MAIL_PASS=your_mailtrap_password
-MAIL_FROM="Ozan E-Commerce <noreply@yourdomain.com>"
+MAIL_USER=your_mail_user
+MAIL_PASS=your_mail_pass
+MAIL_FROM="No Reply <noreply@ecommerce.com>"
+
+REDIS_HOST=localhost
+REDIS_PORT=6379
+ELASTICSEARCH_NODE=http://localhost:9200
 ```
 
 ---
